@@ -128,26 +128,63 @@ public class CoolingJdbc implements ICoolingJdbc {
     @Override
     public void clearTray(Integer trayId) {
         L.info("clearTray: trayId: " + trayId);
-        String delSample = "DELETE FROM place \n" +
-                "WHERE sampleid IN (SELECT sampleid FROM place WHERE trayid = ?);";
-        String deltray = "DELETE FROM tray \n" +
-                "WHERE trayid = ?;";
+        // TODO Auto-generated method stub
+
+        String sqlCheckTray = "SELECT trayid FROM tray WHERE trayid = ?";
+
+
+        String sqlGetSamples = "SELECT sampleid FROM place WHERE trayid = ?";
+
+
+        String sqlDeletePlaces = "DELETE FROM place WHERE trayid = ?";
+
+
+        String sqlDeleteSample = "DELETE FROM sample WHERE sampleid = ?";
 
         PreparedStatement p = null;
         ResultSet rs = null;
+        List<Integer> sampleIdsToDelete = new LinkedList<>();
 
         try {
 
-        } catch (SQLException e) {
+            p = useConnection().prepareStatement(sqlCheckTray);
+            p.setInt(1, trayId);
+            rs = p.executeQuery();
 
-            if (e.getErrorCode() == 1) {
-                throw new CoolingSystemException("");
+            if (!rs.next()) {
+                throw new CoolingSystemException("Tablett mit ID " + trayId + " existiert nicht.");
             }
+            rs.close();
+            p.close();
+
+
+            p = useConnection().prepareStatement(sqlGetSamples);
+            p.setInt(1, trayId);
+            rs = p.executeQuery();
+            while (rs.next()) {
+                sampleIdsToDelete.add(rs.getInt("sampleid"));
+            }
+            rs.close();
+            p.close();
+
+
+            p = useConnection().prepareStatement(sqlDeletePlaces);
+            p.setInt(1, trayId);
+            p.executeUpdate();
+            p.close();
+
+            p = useConnection().prepareStatement(sqlDeleteSample);
+            for (Integer sampleId : sampleIdsToDelete) {
+                p.setInt(1, sampleId);
+                p.executeUpdate();
+            }
+
+        } catch (SQLException e) {
             throw new DataException(e);
+        } finally {
+            try { if (rs != null) rs.close(); } catch (SQLException e) { L.error("Fehler ResultSet", e); }
+            try { if (p != null) p.close(); } catch (SQLException e) { L.error("Fehler PreparedStatement", e); }
         }
-
-        // TODO Auto-generated method stub
-
     }
 
 }
