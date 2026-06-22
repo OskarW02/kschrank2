@@ -24,11 +24,11 @@ import de.htwberlin.dbtech.utils.DbCred;
 import de.htwberlin.dbtech.utils.DbUnitUtils;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class CoolingServiceJavaTest {
-    private static final Logger L = LoggerFactory.getLogger(CoolingServiceJavaTest.class);
+public class CoolingServiceDaoJavaTest {
+    private static final Logger L = LoggerFactory.getLogger(CoolingServiceDaoJavaTest.class);
     private static IDatabaseConnection dbTesterCon = null;
 
-    private static final ICoolingService cs = new CoolingService();
+    private static final ICoolingService cs = new CoolingServiceDao();
 
     @BeforeClass
     public static void setUp() {
